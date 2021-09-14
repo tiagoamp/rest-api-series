@@ -10,13 +10,15 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel="spring")
 public interface BookMapper {
 
-    Book toModel(BookRequest req);
+    Book toModel(BookRequest request);
 
     Book toModel(BookEntity entity);
 
-    BookEntity toEntity(Book book);
+    BookEntity toEntity(Book model);
 
-    @Mapping(source="book.id", target="id")
-    BookResponse toResponse(Book book);
+    //@Mapping(source="model.id", target="id")
+    BookResponse toResponse(Book model);
+
+    BookRequest toRequest(Book model);
 
 }
