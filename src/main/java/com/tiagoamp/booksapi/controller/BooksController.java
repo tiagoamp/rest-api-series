@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,8 +30,6 @@ public class BooksController {
     private ReviewMapper reviewMapper;
 
 
-    // validation ???
-
     @GetMapping
     public ResponseEntity<List<BookResponse>> getBooks() {
         List<Book> books = service.findAllBooks();
@@ -46,7 +45,7 @@ public class BooksController {
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> createBook(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> createBook(@RequestBody @Valid BookRequest request) {
         Book book = bookMapper.toModel(request);
         book = service.createBook(book);
         BookResponse bookResp = bookMapper.toResponse(book);
@@ -54,7 +53,7 @@ public class BooksController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<BookResponse> updateBook(@PathVariable("id") Integer id, @RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> updateBook(@PathVariable("id") Integer id, @RequestBody @Valid BookRequest request) {
         Book book = bookMapper.toModel(request);
         book.setId(id);
         book = service.updateBook(book);
@@ -84,11 +83,17 @@ public class BooksController {
     }
 
     @PostMapping("{bookId}/review")
-    public ResponseEntity<ReviewResponse> createReview(@PathVariable("bookId") Integer bookId, @RequestBody ReviewRequest request) {
+    public ResponseEntity<ReviewResponse> createReview(@PathVariable("bookId") Integer bookId, @RequestBody @Valid ReviewRequest request) {
         Review review = reviewMapper.toModel(request);
         review = service.createReview(bookId, review);
         ReviewResponse reviewResp = reviewMapper.toResponse(review);
         return ResponseEntity.created(URI.create(review.getId().toString())).body(reviewResp);
+    }
+
+    @DeleteMapping("{bookId}/review/{reviewId}")
+    public ResponseEntity deleteReview(@PathVariable("bookId") Integer bookId, @PathVariable("reviewId") Integer reviewId) {
+        service.deleteReview(bookId, reviewId);
+        return ResponseEntity.noContent().build();
     }
 
 }

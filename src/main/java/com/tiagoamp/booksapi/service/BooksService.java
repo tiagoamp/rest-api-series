@@ -2,15 +2,21 @@ package com.tiagoamp.booksapi.service;
 
 import com.tiagoamp.booksapi.model.Book;
 import com.tiagoamp.booksapi.model.Review;
+import com.tiagoamp.booksapi.repository.BooksRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class BooksService {
 
+    private BooksRepository booksRepo;
+
+
     public List<Book> findAllBooks() {
-        return null;
+        return booksRepo.findAll();
     }
 
     public Book findBookById(Integer id) {
@@ -39,6 +45,10 @@ public class BooksService {
 
     public Review createReview(Integer bookId, Review review) {
         return null;
+    }
+
+    public void deleteReview(Integer bookId, Integer reviewId) {
+        return;
     }
 
 }

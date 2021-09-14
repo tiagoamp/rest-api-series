@@ -10,5 +10,9 @@ spring:
     console:
       enabled: true
 
-server:
-  port: 9090
+  jackson:
+    default-property-inclusion: non_null
+
+  server:
+    port: 9090
+
