@@ -7,10 +7,7 @@ import com.tiagoamp.booksapi.exception.ResourceAlreadyExistsException;
 import com.tiagoamp.booksapi.exception.ResourceNotFoundException;
 import com.tiagoamp.booksapi.mapper.BookMapper;
 import com.tiagoamp.booksapi.mapper.BookMapperImpl;
-import com.tiagoamp.booksapi.mapper.ReviewMapper;
-import com.tiagoamp.booksapi.mapper.ReviewMapperImpl;
 import com.tiagoamp.booksapi.model.Book;
-import com.tiagoamp.booksapi.model.Review;
 import com.tiagoamp.booksapi.service.BooksService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,9 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.hamcrest.Matchers.emptyArray;
+import static com.tiagoamp.booksapi.TestHelper.booksMock;
+import static com.tiagoamp.booksapi.TestHelper.reviewsMock;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest
 @AutoConfigureMockMvc(addFilters = false)  // disable security filters
-@ComponentScan(basePackageClasses = {BookMapper.class, BookMapperImpl.class, ReviewMapper.class, ReviewMapperImpl.class})  // allows mapstruct mappers dep injection
+@ComponentScan(basePackageClasses = {BookMapper.class, BookMapperImpl.class})  // allows mapstruct mappers dep injection
 class BooksControllerTest {
 
     @MockBean
@@ -45,8 +42,6 @@ class BooksControllerTest {
 
     @Autowired
     private BookMapperImpl bookMapper;
-    @Autowired
-    private ReviewMapperImpl reviewMapper;
 
     @Autowired
     private BooksController controller;
@@ -55,13 +50,6 @@ class BooksControllerTest {
     private MockMvc mockMvc;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
-
-    private List<Book> booksMock = List.of( new Book(1, "title 1", "lang 1", 2001, "author 1"),
-            new Book(2, "title 2", "lang 2", 2002, "author 2"),
-            new Book(3, "title 3", "lang 3", 2003, "author 3") );
-
-    private List<Review> reviewsMock = List.of( new Review(10, "Review Text 01"),
-            new Review(20, "Review Text 02"), new Review(30, "Review Text 03") );
 
 
     @Test
@@ -287,39 +275,6 @@ class BooksControllerTest {
 
 
     @Test
-    @DisplayName("When Get Reviews by non-existing id Should return error")
-    public void whenGetReviewsByNonExistingIdRequest_resultError() throws Exception {
-        Integer bookId = 1, reviewId = 10;
-        Mockito.when(booksService.findReview(Mockito.anyInt(), Mockito.anyInt())).thenThrow(new ResourceNotFoundException(Review.class.getSimpleName(), reviewId.toString()));
-        mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/book/{bookId}/review/{reviewId}", bookId, reviewId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").exists())
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.details").doesNotExist())
-                .andExpect(jsonPath("$.title", is( ResourceNotFoundException.class.getSimpleName() )))
-                .andExpect(jsonPath("$.message", containsString( Review.class.getSimpleName())) )
-                .andExpect(jsonPath("$.message", containsString( reviewId.toString())) );
-    }
-
-    @Test
-    @DisplayName("When Get Review by id request Should result review response")
-    public void whenGetReviewByIdRequest_resultResponse() throws Exception {
-        Review reviewMock = reviewsMock.get(0);
-        Integer bookId = 1, reviewId = reviewMock.getId();
-        Mockito.when(booksService.findReview(Mockito.anyInt(), Mockito.anyInt())).thenReturn(reviewMock);
-        mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/book/{bookId}/review/{reviewId}", bookId, reviewId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.id", is( reviewId )))
-                .andExpect(jsonPath("$.text").exists());
-    }
-
-
-    @Test
     @DisplayName("When Post with invalid Review values request Should result validation error")
     public void whenPostReviewInvalidValuesRequest_resultError() throws Exception {
         ReviewRequest invalidReq = new ReviewRequest();
@@ -330,70 +285,20 @@ class BooksControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title", is("ValidationException")))
                 .andExpect(jsonPath("$.details").exists())
-                .andExpect(jsonPath("$.details.text").exists());
-    }
-
-    @Test
-    @DisplayName("When Post Review request of a existing entity Should result error")
-    public void whenPostReviewExistingRequest_resultError() throws Exception {
-        Review reviewMock = reviewsMock.get(0);
-        ReviewRequest req = reviewMapper.toRequest(reviewMock);
-        String json = jsonMapper.writeValueAsString(req);
-        Mockito.when(booksService.createReview(Mockito.anyInt(), Mockito.any(Review.class))).thenThrow(new ResourceAlreadyExistsException(Review.class.getSimpleName(), reviewMock.getId().toString()));
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/api/v1/book/{bookId}/review", 1)
-                .content(json).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").exists())
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.details").doesNotExist())
-                .andExpect(jsonPath("$.title", is( ResourceAlreadyExistsException.class.getSimpleName() )))
-                .andExpect(jsonPath("$.message", containsString( Review.class.getSimpleName())) )
-                .andExpect(jsonPath("$.message", containsString( reviewMock.getId().toString())) );
+                .andExpect(jsonPath("$.details.review").exists());
     }
 
     @Test
     @DisplayName("When Post with valid request Should result book response")
     public void whenPostReviewValidRequest_resultResponse() throws Exception {
-        Review reviewMock = reviewsMock.get(0);
-        ReviewRequest req = reviewMapper.toRequest(reviewMock);
-        String json = jsonMapper.writeValueAsString(req);
-        Mockito.when(booksService.createReview(Mockito.anyInt(), Mockito.any(Review.class))).thenReturn(reviewMock);
+        String reviewMock = reviewsMock.get(0);
+        String json = jsonMapper.writeValueAsString( new ReviewRequest(reviewMock) );
+        Mockito.when(booksService.addReview(Mockito.anyInt(), Mockito.anyString())).thenReturn(reviewMock);
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/v1/book/{bookId}/review", 1)
                 .content(json).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.id", is( reviewMock.getId() )))
-                .andExpect(jsonPath("$.text").exists());
-    }
-
-
-    @Test
-    @DisplayName("When Delete Review request of a non-existing id Should result error")
-    public void whenDeleteReviewNonExistingIdRequest_resultError() throws Exception {
-        Integer bookId = 1, reviewId = 10;
-        Mockito.doThrow(new ResourceNotFoundException(Review.class.getSimpleName(), reviewId.toString())).when(booksService).deleteReview(Mockito.anyInt(), Mockito.anyInt());
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/v1/book/{bookId}/review/{reviewId}", bookId, reviewId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").exists())
-                .andExpect(jsonPath("$.message").exists())
-                .andExpect(jsonPath("$.details").doesNotExist())
-                .andExpect(jsonPath("$.title", is( ResourceNotFoundException.class.getSimpleName() )))
-                .andExpect(jsonPath("$.message", containsString( Review.class.getSimpleName())) )
-                .andExpect(jsonPath("$.message", containsString( reviewId.toString())) );
-    }
-
-    @Test
-    @DisplayName("When Delete Review with valid request Should result response")
-    public void whenDeleteReviewRequest_resultResponse() throws Exception {
-        Integer bookId = 1, reviewId = 10;
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/v1/book/{bookId}/review/{reviewId}", bookId, reviewId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(jsonPath("$.review").exists());
     }
 
 }
