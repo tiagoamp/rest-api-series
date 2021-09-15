@@ -21,6 +21,10 @@ public class BookEntity {
 
     private String authors;
 
+//    @ElementCollection(fetch=FetchType.LAZY)
+//    @CollectionTable(name="TUBES", joinColumns=@JoinColumn(name="role_id"))
+//    @Column(name="tube")
+
     @OneToMany(mappedBy = "book" , fetch = FetchType.LAZY)
     private List<ReviewEntity> reviews;
 
