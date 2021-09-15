@@ -145,7 +145,20 @@ class BooksServiceTest {
     }
 
     @Test
-    void addReview() {
+    @DisplayName("When book does not exist should throw exception")
+    void addReview_exception() {
+        Mockito.when(repo.find(Mockito.anyInt())).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.findBookById(1));
+    }
+
+    @Test
+    @DisplayName("When valid book and review should return result")
+    void addReview_result() {
+        String reviewMock = reviewsMock.get(0);
+        Mockito.when(repo.find(Mockito.anyInt())).thenReturn(Optional.of(bookMock));
+        Mockito.when(repo.addReview(Mockito.anyInt(), Mockito.anyString())).thenReturn(reviewMock);
+        String result = service.addReview(bookMock.getId(), reviewMock);
+        assertEquals(reviewMock, result);
     }
 
 }
