@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 public class ReviewRequest {
 
     @NotEmpty(message = "{required.field}")
-    @Size(min = 1, max = 50, message = "{invalid.field}")
-    private String text;
+    @Size(min = 1, max = 200, message = "{invalid.field}")
+    private String review;
 
 }

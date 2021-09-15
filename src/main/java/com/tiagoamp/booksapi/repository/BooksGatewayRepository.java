@@ -1,12 +1,11 @@
 package com.tiagoamp.booksapi.repository;
 
 import com.tiagoamp.booksapi.mapper.BookMapper;
-import com.tiagoamp.booksapi.mapper.ReviewMapper;
 import com.tiagoamp.booksapi.model.Book;
-import com.tiagoamp.booksapi.model.Review;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +16,7 @@ import static java.util.stream.Collectors.toList;
 public class BooksGatewayRepository {
 
     private BookRepository bookRepo;
-    private ReviewRepository reviewRepo;
     private BookMapper bookMapper;
-    private ReviewMapper reviewMapper;
 
 
     public List<Book> findAll() {
@@ -56,28 +53,17 @@ public class BooksGatewayRepository {
         bookRepo.delete(entity);
     }
 
-    public List<Review> findReviewsOfBook(Integer bookId) {
+    public List<String> findReviewsOfBook(Integer bookId) {
         BookEntity bookEntity = bookRepo.getById(bookId);
-        List<ReviewEntity> reviewEntities = bookEntity.getReviews();
-        return reviewEntities.stream().map(reviewMapper::toModel).collect(toList());
+        List<String> reviews = bookEntity.getReviews();
+        return reviews != null ? reviews : new ArrayList<>();
     }
 
-    public Optional<Review> findReview(Integer reviewId) {
-        Optional<ReviewEntity> entityOpt = reviewRepo.findById(reviewId);
-        return mapToReviewModelOptional(entityOpt);
-    }
-
-    public Review save(Integer bookId, Review review) {
+    public String addReview(Integer bookId, String review) {
         BookEntity bookEntity = bookRepo.getById(bookId);
-        ReviewEntity reviewEntity = reviewMapper.toEntity(review);
-        reviewEntity.setBook(bookEntity);
-        reviewEntity = reviewRepo.save(reviewEntity);
-        return reviewMapper.toModel(reviewEntity);
-    }
-
-    public void deleteReview(Integer reviewId) {
-        ReviewEntity entity = reviewRepo.getById(reviewId);
-        reviewRepo.delete(entity);
+        bookEntity.getReviews().add(review);
+        bookRepo.save(bookEntity);
+        return review;
     }
 
 
@@ -86,13 +72,6 @@ public class BooksGatewayRepository {
             return Optional.empty();
         Book book = bookMapper.toModel(entityOpt.get());
         return Optional.of(book);
-    }
-
-    private Optional<Review> mapToReviewModelOptional(Optional<ReviewEntity> entityOpt) {
-        if (entityOpt.isEmpty())
-            return Optional.empty();
-        Review review = reviewMapper.toModel(entityOpt.get());
-        return Optional.of(review);
     }
 
 }

@@ -5,18 +5,16 @@ import com.tiagoamp.booksapi.controller.dto.BookResponse;
 import com.tiagoamp.booksapi.controller.dto.ReviewRequest;
 import com.tiagoamp.booksapi.controller.dto.ReviewResponse;
 import com.tiagoamp.booksapi.mapper.BookMapper;
-import com.tiagoamp.booksapi.mapper.ReviewMapper;
 import com.tiagoamp.booksapi.model.Book;
-import com.tiagoamp.booksapi.model.Review;
 import com.tiagoamp.booksapi.service.BooksService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -27,7 +25,6 @@ public class BooksController {
 
     private BooksService service;
     private BookMapper bookMapper;
-    private ReviewMapper reviewMapper;
 
 
     @GetMapping
@@ -70,30 +67,17 @@ public class BooksController {
 
     @GetMapping("{bookId}/review")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable("bookId") Integer bookId) {
-        List<Review> reviews = service.findReviewsOfBook(bookId);
-        List<ReviewResponse> reviewsResp = reviews.stream().map(reviewMapper::toResponse).collect(toList());
+        List<String> reviews = service.findReviewsOfBook(bookId);
+        List<ReviewResponse> reviewsResp = reviews.stream().map(ReviewResponse::new).collect(toList());
         return ResponseEntity.ok(reviewsResp);
-    }
-
-    @GetMapping("{bookId}/review/{reviewId}")
-    public ResponseEntity<ReviewResponse> getReview(@PathVariable("bookId") Integer bookId, @PathVariable("reviewId") Integer reviewId) {
-        Review review = service.findReview(bookId, reviewId);
-        ReviewResponse reviewResp = reviewMapper.toResponse(review);
-        return ResponseEntity.ok(reviewResp);
     }
 
     @PostMapping("{bookId}/review")
     public ResponseEntity<ReviewResponse> createReview(@PathVariable("bookId") Integer bookId, @RequestBody @Valid ReviewRequest request) {
-        Review review = reviewMapper.toModel(request);
-        review = service.createReview(bookId, review);
-        ReviewResponse reviewResp = reviewMapper.toResponse(review);
-        return ResponseEntity.created(URI.create(review.getId().toString())).body(reviewResp);
-    }
-
-    @DeleteMapping("{bookId}/review/{reviewId}")
-    public ResponseEntity deleteReview(@PathVariable("bookId") Integer bookId, @PathVariable("reviewId") Integer reviewId) {
-        service.deleteReview(bookId, reviewId);
-        return ResponseEntity.noContent().build();
+        String review = request.getReview();
+        review = service.addReview(bookId, review);
+        ReviewResponse reviewResp = new ReviewResponse(review);
+        return ResponseEntity.created(URI.create("/")).body(reviewResp);
     }
 
 }

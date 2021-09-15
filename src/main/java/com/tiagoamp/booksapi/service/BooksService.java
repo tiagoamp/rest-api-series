@@ -3,7 +3,6 @@ package com.tiagoamp.booksapi.service;
 import com.tiagoamp.booksapi.exception.ResourceAlreadyExistsException;
 import com.tiagoamp.booksapi.exception.ResourceNotFoundException;
 import com.tiagoamp.booksapi.model.Book;
-import com.tiagoamp.booksapi.model.Review;
 import com.tiagoamp.booksapi.repository.BooksGatewayRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,41 +44,19 @@ public class BooksService {
         booksRepo.delete(id);
     }
 
-    public List<Review> findReviewsOfBook(Integer bookId) {
+    public List<String> findReviewsOfBook(Integer bookId) {
         abortIfBookDoesNotExist(bookId);
         return booksRepo.findReviewsOfBook(bookId);
     }
 
-    public Review findReview(Integer bookId, Integer reviewId) {
-        return findReviewsOfBook(bookId).stream().filter(r -> r.getId().intValue() == reviewId.intValue()).findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(Review.class.getSimpleName(), reviewId.toString());
-    }
-
-    public Review createReview(Integer bookId, Review review) {
+    public String addReview(Integer bookId, String review) {
         abortIfBookDoesNotExist(bookId);
-        List<Review> reviews = findReviewsOfBook(bookId);
-        Optional<Review> registeredReview = reviews.stream().filter(r -> r.getText().equals(review.getText())).findFirst();
-        if (registeredReview.isPresent())
-            throw new ResourceAlreadyExistsException(Review.class.getSimpleName(), registeredReview.get().getId().toString());
-        return booksRepo.save(bookId, review);
-    }
-
-    public void deleteReview(Integer bookId, Integer reviewId) {
-        abortIfReviewIdDoesNotBelongToBook(bookId, reviewId);
-        booksRepo.deleteReview(reviewId);
+        return booksRepo.addReview(bookId, review);
     }
 
 
     private void abortIfBookDoesNotExist(Integer id) {
-        booksRepo.find(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Book.class.getSimpleName(), id.toString()));
-    }
-
-    private void abortIfReviewIdDoesNotBelongToBook(Integer bookId, Integer reviewId) {
-        abortIfBookDoesNotExist(bookId);
-        boolean containsReviewId = booksRepo.findReviewsOfBook(bookId).stream().anyMatch(r -> r.getId().intValue() == reviewId.intValue());
-        if (!containsReviewId)
-            throw new ResourceNotFoundException(Review.class.getSimpleName(), reviewId.toString());
+        booksRepo.find(id).orElseThrow(() -> new ResourceNotFoundException(Book.class.getSimpleName(), id.toString()));
     }
 
 }

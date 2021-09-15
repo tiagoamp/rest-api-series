@@ -3,9 +3,7 @@ package com.tiagoamp.booksapi.service;
 import com.tiagoamp.booksapi.exception.ResourceAlreadyExistsException;
 import com.tiagoamp.booksapi.exception.ResourceNotFoundException;
 import com.tiagoamp.booksapi.mapper.BookMapper;
-import com.tiagoamp.booksapi.mapper.ReviewMapper;
 import com.tiagoamp.booksapi.model.Book;
-import com.tiagoamp.booksapi.model.Review;
 import com.tiagoamp.booksapi.repository.BooksGatewayRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tiagoamp.booksapi.TestHelper.booksMock;
+import static com.tiagoamp.booksapi.TestHelper.reviewsMock;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,20 +31,11 @@ class BooksServiceTest {
 
     @Spy  // injects this specific instance to target class
     private BookMapper bookMapper = Mappers.getMapper(BookMapper.class);
-    @Spy
-    private ReviewMapper reviewMapper = Mappers.getMapper(ReviewMapper.class);
 
     @InjectMocks
     private BooksService service;
 
-    private List<Book> booksMock = List.of( new Book(1, "title 1", "lang 1", 2001, "author 1"),
-            new Book(2, "title 2", "lang 2", 2002, "author 2"),
-            new Book(3, "title 3", "lang 3", 2003, "author 3") );
-
     private Book bookMock = booksMock.get(0);
-
-    private List<Review> reviewsMock = List.of( new Review(10, "Review Text 01"),
-            new Review(20, "Review Text 02"), new Review(30, "Review Text 03") );
 
 
     @Test
@@ -138,7 +129,7 @@ class BooksServiceTest {
     void findReviewsOfBook_emptyList() {
         Mockito.when(repo.find(Mockito.anyInt())).thenReturn(Optional.of(bookMock));
         Mockito.when(repo.findReviewsOfBook(Mockito.anyInt())).thenReturn(new ArrayList<>());
-        List<Review> result = service.findReviewsOfBook(bookMock.getId());
+        List<String> result = service.findReviewsOfBook(bookMock.getId());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -148,21 +139,13 @@ class BooksServiceTest {
     void findReviewsOfBook_result() {
         Mockito.when(repo.find(Mockito.anyInt())).thenReturn(Optional.of(bookMock));
         Mockito.when(repo.findReviewsOfBook(Mockito.anyInt())).thenReturn(reviewsMock);
-        List<Review> result = service.findReviewsOfBook(bookMock.getId());
+        List<String> result = service.findReviewsOfBook(bookMock.getId());
         assertFalse(result.isEmpty());
         assertEquals(booksMock.size(), result.size());
     }
 
-
     @Test
-    void findReview() {
+    void addReview() {
     }
 
-    @Test
-    void createReview() {
-    }
-
-    @Test
-    void deleteReview() {
-    }
 }

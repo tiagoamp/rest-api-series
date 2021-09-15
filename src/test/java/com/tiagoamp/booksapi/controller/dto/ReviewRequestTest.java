@@ -22,7 +22,7 @@ class ReviewRequestTest {
         ReviewRequest request = new ReviewRequest();
         Set<ConstraintViolation<ReviewRequest>> errors = validator.validate(request);
         assertFalse(errors.isEmpty(), "Should have validation errors");
-        List<String> requiredFieds = List.of("text");
+        List<String> requiredFieds = List.of("review");
         errors.stream().forEach(e -> {
             String property = e.getPropertyPath().toString();
             assertTrue(requiredFieds.contains(property), "Should have required field validation error");
@@ -35,7 +35,7 @@ class ReviewRequestTest {
         ReviewRequest request = new ReviewRequest("");
         Set<ConstraintViolation<ReviewRequest>> errors = validator.validate(request);
         assertFalse(errors.isEmpty(), "Should have validation errors");
-        assertTrue(errors.stream().anyMatch(e -> e.getPropertyPath().toString().equals("text")), "Should have text validation error");
+        assertTrue(errors.stream().anyMatch(e -> e.getPropertyPath().toString().equals("review")), "Should have text validation error");
     }
 
     @Test
