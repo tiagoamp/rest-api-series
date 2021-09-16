@@ -3,6 +3,7 @@ package com.tiagoamp.booksapi.repository;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity  @Table(name = "BOOKS")
@@ -24,6 +25,6 @@ public class BookEntity {
     @ElementCollection(fetch=FetchType.LAZY)
     @CollectionTable(name="REVIEWS", joinColumns=@JoinColumn(name="BOOK_ID"))
     @Column(name="TEXT")
-    private List<String> reviews;
+    private List<String> reviews = new ArrayList<>();
 
 }
