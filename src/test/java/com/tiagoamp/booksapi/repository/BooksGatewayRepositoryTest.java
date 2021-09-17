@@ -49,7 +49,11 @@ class BooksGatewayRepositoryTest {
     @Test
     @DisplayName("When no books registered Should return empty list")
     void findAll_emptyList() {
+        // given
+        removeAllBooksFromDatabase();
+        //when
         List<Book> result = repository.findAll();
+        // then
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -57,6 +61,7 @@ class BooksGatewayRepositoryTest {
     @Test
     @DisplayName("When books registered Should return list")
     void findAll_resultList() {
+        removeAllBooksFromDatabase();
         List<Book> added = insertBooksIntoDatabase();
         var result = repository.findAll();
         assertNotNull(result);
@@ -238,6 +243,15 @@ class BooksGatewayRepositoryTest {
         entity = entityManager.persist(entity);
         entityManager.flush();
         return bookMapper.toModel(entity);
+    }
+
+    private void removeAllBooksFromDatabase() {
+        List<Book> existing = repository.findAll();
+        existing.stream().forEach(b -> {
+            BookEntity entity = entityManager.find(BookEntity.class, b.getId());
+            entityManager.remove(entity);
+            entityManager.flush();
+        });
     }
 
 }
