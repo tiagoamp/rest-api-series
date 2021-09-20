@@ -1,6 +1,5 @@
 package com.tiagoamp.booksapi.repository;
 
-import com.tiagoamp.booksapi.controller.dto.ReviewRequest;
 import com.tiagoamp.booksapi.mapper.BookMapper;
 import com.tiagoamp.booksapi.model.Book;
 import lombok.AllArgsConstructor;
