@@ -108,7 +108,7 @@ class BooksControllerTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.id", is( bookMock.getId() )))
                 .andExpect(jsonPath("$.title").exists())
-        ;
+                .andExpect(jsonPath("$._links").exists());  // HATEOAS
     }
 
 
