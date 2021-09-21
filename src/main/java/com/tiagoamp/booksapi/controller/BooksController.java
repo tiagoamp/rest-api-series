@@ -12,11 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Size;
 import java.net.URI;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/book")
@@ -30,14 +31,19 @@ public class BooksController {
     @GetMapping
     public ResponseEntity<List<BookResponse>> getBooks() {
         List<Book> books = service.findAllBooks();
-        List<BookResponse> booksResp = books.stream().map(bookMapper::toResponse).collect(toList());
+        List<BookResponse> booksResp = books.stream()
+                .map(bookMapper::toResponse)
+                .map(b -> b.add( linkTo(methodOn(this.getClass()).getBook(b.getId())).withSelfRel() ))
+                .collect(toList());
         return ResponseEntity.ok(booksResp);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBook(@PathVariable("id") Integer id) {
         Book book = service.findBookById(id);
-        BookResponse bookResp = bookMapper.toResponse(book);
+        BookResponse bookResp = bookMapper.toResponse(book)
+                .add( linkTo(methodOn(this.getClass()).getReviews(id)).withRel("reviews") )
+                .add( linkTo(methodOn(this.getClass()).getBooks()).withRel("books") );
         return ResponseEntity.ok(bookResp);
     }
 
@@ -68,7 +74,10 @@ public class BooksController {
     @GetMapping("{bookId}/review")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable("bookId") Integer bookId) {
         List<String> reviews = service.findReviewsOfBook(bookId);
-        List<ReviewResponse> reviewsResp = reviews.stream().map(ReviewResponse::new).collect(toList());
+        List<ReviewResponse> reviewsResp = reviews.stream()
+                .map(ReviewResponse::new)
+                .map(r -> r.add( linkTo(methodOn(this.getClass()).getBook(bookId)).withRel("book") ))
+                .collect(toList());
         return ResponseEntity.ok(reviewsResp);
     }
 

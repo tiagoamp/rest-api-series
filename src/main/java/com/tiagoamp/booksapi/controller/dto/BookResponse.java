@@ -1,9 +1,10 @@
 package com.tiagoamp.booksapi.controller.dto;
 
 import lombok.Data;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
-public class BookResponse {
+public class BookResponse extends RepresentationModel<BookResponse> {
 
     private Integer id;
     private String title;
