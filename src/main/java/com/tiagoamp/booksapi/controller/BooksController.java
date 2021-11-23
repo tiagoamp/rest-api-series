@@ -95,7 +95,7 @@ public class BooksController {
     }
 
     @Operation( summary = "Find reviews", description = "Get review of a book" )
-    @GetMapping("{bookId}/review")
+    @GetMapping("{bookId}/reviews")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable("bookId") Integer bookId) {
         List<String> reviews = service.findReviewsOfBook(bookId);
         List<ReviewResponse> reviewsResp = reviews.stream()
@@ -112,7 +112,7 @@ public class BooksController {
                     @ApiResponse( responseCode = "404", description = "Book not found" )
             }
     )
-    @PostMapping("{bookId}/review")
+    @PostMapping("{bookId}/reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ReviewResponse> createReview(@PathVariable("bookId") Integer bookId, @RequestBody @Valid ReviewRequest request) {
         String review = request.getReview();
