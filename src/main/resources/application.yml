@@ -7,7 +7,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
-    defer-datasource-initialization: true  # to allow DB initialization scripts (since Spring Boot version 2.5.0)
+    defer-datasource-initialization: true   # to allow DB initialization scripts (since Spring Boot version 2.5.0)
     properties:
       hibernate:
         format_sql: true
@@ -25,4 +25,4 @@ server:
    port: 9090
 
 auth:
-  secret: secret
+  secret: secret   # secret for jwt token
