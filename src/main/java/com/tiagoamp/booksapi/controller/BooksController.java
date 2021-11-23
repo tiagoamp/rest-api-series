@@ -65,14 +65,14 @@ public class BooksController {
     }
 
 
-    @GetMapping("{bookId}/review")
+    @GetMapping("{bookId}/reviews")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable("bookId") Integer bookId) {
         List<String> reviews = service.findReviewsOfBook(bookId);
         List<ReviewResponse> reviewsResp = reviews.stream().map(ReviewResponse::new).collect(toList());
         return ResponseEntity.ok(reviewsResp);
     }
 
-    @PostMapping("{bookId}/review")
+    @PostMapping("{bookId}/reviews")
     public ResponseEntity<ReviewResponse> createReview(@PathVariable("bookId") Integer bookId, @RequestBody @Valid ReviewRequest request) {
         String review = request.getReview();
         review = service.addReview(bookId, review);
