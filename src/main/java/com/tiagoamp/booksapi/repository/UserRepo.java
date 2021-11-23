@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface UserRepo extends JpaRepository<AppUser, Integer> {
 
     AppUser findByUsername(String username);
-
+ 
 }

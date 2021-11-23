@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Data
-@NoArgsConstructor  @AllArgsConstructor
+@NoArgsConstructor   @AllArgsConstructor
 @Entity  @Table(name = "ROLES")
 public class Role {
 
@@ -15,7 +15,6 @@ public class Role {
     private Integer id;
 
     private String name;
-
 
     public Role(String name) {
         this.name = name;
