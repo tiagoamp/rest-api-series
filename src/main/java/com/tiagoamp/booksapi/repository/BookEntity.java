@@ -10,8 +10,7 @@ import java.util.List;
 @Data
 public class BookEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id  @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String title;
