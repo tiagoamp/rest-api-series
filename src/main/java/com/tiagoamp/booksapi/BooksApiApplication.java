@@ -24,7 +24,7 @@ public class BooksApiApplication {
 
 	@Bean
 	CommandLineRunner run(UserService userService) {
-		return args -> {
+		return args -> {  // inserting data after application is up
 			// roles
 			userService.save(new Role(null, "ROLE_USER"));
 			userService.save(new Role(null, "ROLE_ADMIN"));
