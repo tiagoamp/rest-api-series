@@ -15,7 +15,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>books-api</name>
 	<description>Demo project for Rest API</description>
- 
+
 	<properties>
 		<java.version>11</java.version>
 		<lombok.version>1.18.20</lombok.version>
