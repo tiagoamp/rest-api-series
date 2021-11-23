@@ -1,10 +1,8 @@
 package com.tiagoamp.booksapi.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tiagoamp.booksapi.service.TokenService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,10 +24,10 @@ import java.util.stream.Collectors;
 
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
-    private String secret;
+    private TokenService tokenService;
 
-    public CustomAuthorizationFilter(String secret) {
-        this.secret = secret;
+    public CustomAuthorizationFilter(TokenService tokenService) {
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -39,31 +37,29 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            try {
-                String token = authorizationHeader.substring("Bearer ".length());
-                Algorithm algorithm = Algorithm.HMAC256(secret.getBytes());
-                JWTVerifier verifier = JWT.require(algorithm).build();
-                DecodedJWT decodedJWT = verifier.verify(token);
-                String username = decodedJWT.getSubject();
-                String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
-                Collection<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
-                        .map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                filterChain.doFilter(request, response);
-            } catch (Exception exception) {
-                exception.printStackTrace();  // log error
-                response.setHeader("error", exception.getMessage());
-                //response.sendError(HttpStatus.FORBIDDEN.value());
-                response.setStatus(HttpStatus.FORBIDDEN.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error_msg", exception.getMessage());
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-            }
-        } else {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
+            return;
+        }
+        try {
+            String token = tokenService.getTokenFrom(authorizationHeader);
+            DecodedJWT decodedJWT = tokenService.getDecodedTokenFrom(token);
+            String username = decodedJWT.getSubject();
+            String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+            Collection<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
+                    .map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            filterChain.doFilter(request, response);
+        } catch (Exception exception) {
+            exception.printStackTrace();  // log error
+            response.setHeader("error", exception.getMessage());
+            //response.sendError(HttpStatus.FORBIDDEN.value());
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            Map<String, String> error = new HashMap<>();
+            error.put("error_msg", exception.getMessage());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            new ObjectMapper().writeValue(response.getOutputStream(), error);
         }
     }
 

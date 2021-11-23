@@ -1,8 +1,7 @@
 package com.tiagoamp.booksapi.security;
 
+import com.tiagoamp.booksapi.service.TokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,9 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Value("${auth.secret}")
-    private String secret;
+    private final TokenService tokenService;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -34,9 +31,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), secret);
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), tokenService);
         customAuthenticationFilter.setFilterProcessesUrl("/api/login");
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(secret);
+        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(tokenService);
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests().antMatchers("/api/login/**", "/api/v1/user/refresh-token/**").permitAll();
