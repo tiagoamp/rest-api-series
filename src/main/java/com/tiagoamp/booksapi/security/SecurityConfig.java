@@ -36,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(tokenService);
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.authorizeRequests().antMatchers("/v2/api-docs", "/swagger-ui/**", "swagger-ui.html", "/swagger-resources/**").permitAll();
         http.authorizeRequests().antMatchers("/api/login/**", "/api/v1/user/refresh-token/**").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/v1").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/v1/user/**").hasAnyAuthority("ROLE_USER");
