@@ -24,7 +24,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     private TokenService tokenService;
 
 
-    public CustomAuthenticationFilter (AuthenticationManager authenticationManager, TokenService tokenService) {
+    public CustomAuthenticationFilter(AuthenticationManager authenticationManager, TokenService tokenService) {
         this.authenticationManager = authenticationManager;
         this.tokenService = tokenService;
     }
