@@ -1,3 +1,6 @@
+There is a new version of this API and blog posts!
+New GitHub repository: https://github.com/tiagoamp/rest-api-series-springboot3/tree/main
+
 # rest-api-series
 
 This is the source code of the REST API developed to demonstrate the concepts of this kind of architecture in my blog posts at Medium.
